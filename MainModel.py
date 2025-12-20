@@ -21,6 +21,13 @@ user_input_phase1 = {
     "breathlessness": 0
 }
 
+user_input_phase2 = {
+    "itching" : 1,
+    "yellowish_skin" : 1,
+    "chest_pain" : 0
+}
+
+
 
 x_train = train_df.drop("prognosis", axis=1)
 y_train = train_df["prognosis"]
@@ -76,10 +83,13 @@ def diagnose_phase1_phase2(
     rf, 
     train_df, 
     all_features, 
-    phase1_input, 
+    phase1_input,
+    phase2_input=None, 
     top_n=3, 
     phase2_k=5
 ):
+
+# ---------------------- PHASE 1 : GET SYMPTOMS --------------------#
     x_user_phase1 = build_input_vector(phase1_input, all_features)
     probas = rf.predict_proba(x_user_phase1)[0]
     classes = rf.classes_
@@ -92,13 +102,40 @@ def diagnose_phase1_phase2(
     
     top_disease = [d for d, _ in results[:top_n]]
     
+# --------------------- PHASE 2 : MORE PREDICTIONS -----------------#
     phase2_symptoms = get_discriminative_symptomps(
         train_df,
         top_disease,
         top_k=phase2_k
     )
     
-    return {
-        "phase1_candidates": results[:top_n],
-        "ask_next": phase2_symptoms
-    }
+    print("\nNext Questions: ")
+    print(phase2_symptoms)
+# --------------------- COMBINED PHASE 1 AND 2 INPUTS ---------------# 
+
+    if phase2_input is not None:
+        combined_inputs = {}
+        combined_inputs.update(user_input_phase1)
+        combined_inputs.update(user_input_phase2)  
+        
+        x_final = build_input_vector(combined_inputs, all_features)
+        probs_final = rf.predict_proba(x_train)[0]
+        
+        final_result = sorted(
+            zip(classes, probs_final),
+            key = lambda x : x[1],
+            reverse=True
+        )
+        
+        print("\nFinal Predictions after phase-2: ")
+        for d, p in final_result[:top_n]:
+            print(f"{d} : {p*100:.2f}%")
+            
+
+diagnose_phase1_phase2(
+    rf=rf,
+    train_df=train_df,
+    all_features=all_features,
+    phase1_input=user_input_phase1,
+    phase2_input=user_input_phase2
+)
