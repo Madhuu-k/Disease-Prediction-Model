@@ -6,6 +6,7 @@ from sklearn.multioutput import MultiOutputClassifier
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.metrics import accuracy_score, classification_report
 import matplotlib.pyplot as plt
+import joblib
 
 data = pd.read_csv(r"C:\Users\MADHU\Desktop\Projects\Disease Prediction Model\Datasets\Training.csv")
 
@@ -53,6 +54,8 @@ def build_routing_labels(df, groups):
 y_routing = build_routing_labels(data, PHASE2_GROUPS)
 x_phase1 = data[PHASE1_FEATURES]
 
+# ----------------------------- TRAIN AND TEST THE MODEL ---------------------------------#
+
 x_train, x_test, y_train, y_test = train_test_split(x_phase1, y_routing, random_state=42, test_size=0.2)
 
 routing_model = MultiOutputClassifier(
@@ -84,39 +87,14 @@ def get_groups(user_phase1_df, threshold=0.5):
 
 print(PHASE1_FEATURES)
 
-def plot_routing_probs(user_df):
-    probs = routing_model.predict_proba(user_df)
-    
-    group_names = y_routing.columns
-    group_probs = [p[0][1] for p in probs]
-
-    plt.figure(figsize=(8,4))
-    plt.bar(group_names, group_probs)
-    plt.axhline(0.5, color="red", linestyle="--", label="threshold")
-    plt.ylabel("P(group needed)")
-    plt.title("Phase-2 Routing Probabilities")
-    plt.legend()
-    plt.show()
-    
-
 user1 = pd.DataFrame([{f: 0 for f in PHASE1_FEATURES}])
 user1["high_fever"] = 1
 user1["fatigue"] = 1
 user1["headache"] = 1
 
 print(get_groups(user1))
-plot_routing_probs(user1)
 
 
-
-# user = pd.DataFrame([{
-#     "chest_pain": 1,
-#     "fatigue": 1,
-#     "shortness_of_breath": 0,
-#     "dizziness": 0,
-#     "diabetes": 0,
-#     "family_history": 1,
-#     "obesity": 1,
-# }])
-
-# print(get_groups(user))
+joblib.dump(routing_model, "routing_model.pkl")
+joblib.dump(PHASE1_FEATURES, "phase1_features.pkl")
+joblib.dump(PHASE2_GROUPS, "phase2_groups.pkl")

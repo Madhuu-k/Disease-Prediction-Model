@@ -1,14 +1,23 @@
 import numpy as np
 import joblib
-import preprocess
+import pandas as pd
 
-model = joblib.load("models/disease_model.pkl")
+phase1_features = joblib.load("models/phase1_features.pkl")
+phase2_groups = joblib.load("models/phase2_groups.pkl")
+routing_model = joblib.load("models/routing_model.pkl")
 
-def predict_disease(data):
-    features = preprocess(data)
-    proba = model.predict_proba(features)[0][1]
+def get_phase2_features(input_json, threshold=0.5):
+    user_df = pd.DataFrame([{
+        feature: input_json.get(feature, 0)
+        for feature in phase1_features
+    }])
     
-    return {
-        "risk" : "High" if proba > 0.6 else "Low",
-        "probability": round(float(proba), 3)
-    }
+    probs = routing_model.predict_proba(user_df)
+    
+    selected_groups = []
+    for i, group_name in enumerate(phase2_groups.keys()):
+        if probs[i][0][1] >= threshold:
+            selected_groups.append(group_name)
+
+    return selected_groups
+    
