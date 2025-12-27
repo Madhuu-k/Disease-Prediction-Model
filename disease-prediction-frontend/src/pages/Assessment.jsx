@@ -1,14 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { QUESTIONS } from "../config/questions";
 import QuestionRender from "../components/QuestionRender";
 
 export default function Assessment({ onSubmit }) {
-    const [step, setStep] = useState(0);
-    const [answers, setAnswers] = useState([]);
+    const [step, setStep] = useState(1);
+    const [answers, setAnswers] = useState({});
+    const [route, setRoute] = useState("general");
+
+    useEffect(() => {
+        if (step < 3) return;
+        if (answers.chest_pain || answers.shortness_of_breath) {
+            setRoute("heart");
+        } else if (answers.headache && answers.fever) {
+            setRoute("neuro");
+        }
+    }, [answers, step]);
 
     // Filter questions for current step
-    const currentQuestions = QUESTIONS.filter(
-        (q) => q.step === step
+    const currentQuestions = QUESTIONS.filter((q) => {
+        if(q.step !== step) return false;
+        if(q.route && q.route !== route) return false;
+        return true;}
     );
 
     // Handle change in Input
@@ -37,7 +49,7 @@ export default function Assessment({ onSubmit }) {
             <h2>Health Assessment</h2>
             <p>Step {step} of 5</p>
 
-            {QuestionRender.map((question) => (
+            {currentQuestions.map((question) => (
                 <QuestionRender 
                     key={question.id}
                     question={question}
