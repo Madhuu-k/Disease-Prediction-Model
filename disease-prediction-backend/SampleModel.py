@@ -87,14 +87,6 @@ def get_groups(user_phase1_df, threshold=0.5):
 
 print(PHASE1_FEATURES)
 
-user1 = pd.DataFrame([{f: 0 for f in PHASE1_FEATURES}])
-user1["high_fever"] = 1
-user1["fatigue"] = 1
-user1["headache"] = 1
-
-print(get_groups(user1))
-
-
 joblib.dump(routing_model, "routing_model.pkl")
 joblib.dump(PHASE1_FEATURES, "phase1_features.pkl")
 joblib.dump(PHASE2_GROUPS, "phase2_groups.pkl")

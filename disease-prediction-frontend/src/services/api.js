@@ -7,7 +7,10 @@ export async function predictDisease(payload) {
         body: JSON.stringify(payload)
     });
 
-    if(!res.ok) throw new Error("Prediction Failed");
-    return res.json();
+    const data = await res.json()
+
+    if(!res.ok) throw new Error(data.Error || "Prediction Failed");
+    
+    return data;
 
 }
