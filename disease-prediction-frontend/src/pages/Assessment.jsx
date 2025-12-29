@@ -27,7 +27,7 @@ export default function Assessment({ onSubmit }) {
 
   const handlePhase2Submit = async () => {
     const result = await onSubmit(answers);
-    setFinalResult(result.disease_prediction)
+    setFinalResult(result.disease_predictions)
     setPhase(3);
     console.log("Final Answers:", answers);
     alert("Phase-2 answers captured. (Next: disease prediction)");
