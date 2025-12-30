@@ -1,4 +1,5 @@
 import Assessment  from "./pages/Assessment";
+import './App.css';
 import { predictDisease } from "./services/api";
 
 export default function App() {

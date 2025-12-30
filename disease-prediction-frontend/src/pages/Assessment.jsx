@@ -8,6 +8,7 @@ export default function Assessment({ onSubmit }) {
   const [answers, setAnswers] = useState({});
   const [phase2Questions, setPhase2Questions] = useState([]);
   const [finalResult, setFinalResult] = useState(null)
+  const [currentPage, setCurrentPage] = useState(0);
 
   const handleChange = (id, value) => {
     setAnswers((prev) => ({
@@ -22,6 +23,7 @@ export default function Assessment({ onSubmit }) {
     const questions = Object.values(result.phase2_questions || {}).flat();
 
     setPhase2Questions(questions);
+    setCurrentPage(0);
     setPhase(2);
   };
 
@@ -30,7 +32,6 @@ export default function Assessment({ onSubmit }) {
     setFinalResult(result.disease_predictions)
     setPhase(3);
     console.log("Final Answers:", answers);
-    alert("Phase-2 answers captured. (Next: disease prediction)");
   };
 
   const RestartAssessment = () => {
@@ -56,13 +57,21 @@ export default function Assessment({ onSubmit }) {
     );
   }
 
+  const QUESTIONS_PER_PAGE = 2;
   const questionsToRender = phase === 1 ? QUESTIONS : phase2Questions;
+
+  const startIndex = QUESTIONS_PER_PAGE * currentPage;
+  const endIndex = startIndex + QUESTIONS_PER_PAGE;
+  
+  const currentQuestions = questionsToRender.slice(startIndex, endIndex);
+  const isLast = endIndex >= questionsToRender.length;
+
 
   return (
     <div style={{ padding: "24px" }}>
       <h2>{phase === 1 ? "Health Assessment" : "Follow-up Questions"}</h2>
 
-      {questionsToRender.map((q) => (
+      {currentQuestions.map((q) => (
         <QuestionRender
           key={q.id}
           question={q.question}
@@ -71,13 +80,29 @@ export default function Assessment({ onSubmit }) {
         />
       ))}
 
-      {phase === 1 && (
+      {!isLast && 
+      <div>
+        <button
+          disabled={currentPage===0}
+          onClick={() => setCurrentPage((p) => p - 1)}
+        >Previous</button>
+
+        <button
+          disabled={currentQuestions.some(
+            (q) => answers[q.id] === undefined
+          )}
+          onClick={() => setCurrentPage((p) => p + 1)}
+        >Next</button>  
+      </div>
+      }
+
+      {isLast && phase === 1 && (
         <button onClick={handlePhase1Submit}>
           Continue
         </button>
       )}
 
-      {phase === 2 && (
+      {isLast && phase === 2 && (
         <button onClick={handlePhase2Submit}>
           Submit
         </button>
