@@ -2,6 +2,7 @@ import { useState } from "react";
 import QUESTIONS from "../config/questions";
 import QuestionRender from "../components/QuestionRender";
 import Result from "./Result";
+import "./Assessment.css";
 
 export default function Assessment({ onSubmit }) {
   const [phase, setPhase] = useState(1);
@@ -43,21 +44,13 @@ export default function Assessment({ onSubmit }) {
 
   if (phase === 3) {
     return(
-        <div>
+        <div className="assessment-container">
             <Result predictions={finalResult}/>
-
-            <p style={{ marginTop: "20px", color: "#777", fontSize: "14px" }}>
-                ⚠️ This tool provides AI-based health insights and is not a substitute for professional medical advice.
-            </p>
-            
-            <button onClick={RestartAssessment} style={{ marginTop: "20px" }}>
-                Restart Assessment
-            </button>
         </div>
     );
   }
 
-  const QUESTIONS_PER_PAGE = 2;
+  const QUESTIONS_PER_PAGE = 3;
   const questionsToRender = phase === 1 ? QUESTIONS : phase2Questions;
 
   const startIndex = QUESTIONS_PER_PAGE * currentPage;
@@ -68,7 +61,9 @@ export default function Assessment({ onSubmit }) {
 
 
   return (
-    <div style={{ padding: "24px" }}>
+    <div className="assessment-container">
+      <div className="assessment-wrapper">
+        <div className="assessment-content">
       <h2>{phase === 1 ? "Health Assessment" : "Follow-up Questions"}</h2>
 
       {currentQuestions.map((q) => (
@@ -81,7 +76,7 @@ export default function Assessment({ onSubmit }) {
       ))}
 
       {!isLast && 
-      <div>
+      <div className="button-group">
         <button
           disabled={currentPage===0}
           onClick={() => setCurrentPage((p) => p - 1)}
@@ -107,6 +102,12 @@ export default function Assessment({ onSubmit }) {
           Submit
         </button>
       )}
+
+      <div className="assessment-disclaimer">
+        This assessment provides AI-based insights and does not replace professional medical consultation.
+      </div>
+      </div>
+      </div>
     </div>
   );
 }

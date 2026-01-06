@@ -1,4 +1,5 @@
 import ResultChart from "./ResultChart";
+import "./Result.css";
 
 export default function Result({ predictions, onRestart }) {
   const getRiskClass = (confidence) => {
